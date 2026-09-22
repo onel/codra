@@ -27,6 +27,14 @@ export interface NodeAppBindings {
   ENVIRONMENT: string;
 }
 
+// Number('') is 0 and Number('abc') is NaN, so a blank or malformed variable would otherwise be
+// read as a real setting: BullMQ rejects a concurrency below 1 and refuses to start, and a 0ms
+// shutdown budget force-exits the moment SIGTERM lands.
+export function positiveIntFromEnv(value: string | undefined, fallback: number): number {
+  const parsed = Number(value);
+  return Number.isInteger(parsed) && parsed >= 1 ? parsed : fallback;
+}
+
 export function createNodeEnv(stubs: {
   SESSION_STORE: SessionStore;
   APP_KV: KeyValueStore;

@@ -7,7 +7,7 @@ import { createApiRouter } from '@codraoss/api';
 import { closeDb } from '@codraoss/db/client';
 import { InMemorySessionStore } from '@codraoss/core/ports';
 import { createNodeApiDeps } from './api-deps';
-import { createNodeEnv, type NodeAppBindings } from './env';
+import { createNodeEnv, positiveIntFromEnv, type NodeAppBindings } from './env';
 import { logger } from '@codraoss/api/logger';
 import Redis from 'ioredis';
 import { RedisKVAdapter } from './adapters/redis-kv';
@@ -118,7 +118,7 @@ if (!server && !reviewWorker) {
 // calls plus the engine's inter-phase sleeps run to minutes. Too short a budget and every redeploy
 // kills a running review, leaving its row 'running' with the lease still held.
 // Docker caps this independently -- raise stop_grace_period past it, or the container is killed first.
-const SHUTDOWN_TIMEOUT_MS = Number(process.env.SHUTDOWN_TIMEOUT_MS ?? 300_000);
+const SHUTDOWN_TIMEOUT_MS = positiveIntFromEnv(process.env.SHUTDOWN_TIMEOUT_MS, 300_000);
 
 let shuttingDown = false;
 async function shutdown(signal: string) {

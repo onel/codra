@@ -2,14 +2,14 @@ import { UnrecoverableError, Worker, type Job } from 'bullmq';
 import Redis from 'ioredis';
 import { reviewJobMessageSchema } from '@codraoss/schema';
 import { logger } from '@codraoss/api/logger';
-import type { NodeAppBindings } from './env';
+import { positiveIntFromEnv, type NodeAppBindings } from './env';
 import { REVIEW_QUEUE_NAME } from './queue';
 
 // BullMQ defaults to 1, which lets a single review monopolise the container: the engine sleeps
 // in-process between phases and while polling async model batches, and none of that is work the slot
 // could not spend on another job. 4 matches the engine's highest admission level; the engine still
 // decides how many actually run at once.
-const WORKER_CONCURRENCY = Number(process.env.WORKER_CONCURRENCY ?? 4);
+const WORKER_CONCURRENCY = positiveIntFromEnv(process.env.WORKER_CONCURRENCY, 4);
 
 export interface ReviewWorker {
   worker: Worker;
